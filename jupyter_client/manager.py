@@ -65,12 +65,11 @@ def in_pending_state(method: F) -> F:
     @functools.wraps(method)
     async def wrapper(self, *args, **kwargs):
         # Create a future for the decorated method
-        if self._attempted_start:
-            try:
-                self._ready = Future()
-            except RuntimeError:
-                # No event loop running, use concurrent future
-                self._ready = CFuture()
+        try:
+            self._ready = Future()
+        except RuntimeError:
+            # No event loop running, use concurrent future
+            self._ready = CFuture()
         try:
             # call wrapped method, await, and set the result or exception.
             out = await method(self, *args, **kwargs)
